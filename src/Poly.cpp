@@ -94,3 +94,23 @@ gf2k::elem Poly::operator[](std::size_t i) const
     }
     return coeffs_[i];
 }
+
+gf2k::elem Poly::eval(gf2k::elem x) const
+{
+    if(coeffs_.size() == 0)
+    {
+        return 0;
+    }
+    gf2k::elem res = gf2k::zero();
+
+    for(size_t i = coeffs_.size()-1; true; --i)
+    {
+        if(i == 0)
+        {
+            res = gf2k::add(gf2k::mul_f(res, x), coeffs_[0]);
+            return res;
+        }
+
+        res = gf2k::add(gf2k::mul_f(res, x), coeffs_[i]);
+    }
+}

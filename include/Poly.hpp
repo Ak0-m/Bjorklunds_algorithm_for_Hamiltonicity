@@ -22,6 +22,7 @@ class Poly
     {
         return coeffs_.empty();
     }
-
+    
+    gf2k::elem eval(gf2k::elem x) const;
 
 };

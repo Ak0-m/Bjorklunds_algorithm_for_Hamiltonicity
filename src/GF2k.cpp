@@ -1,4 +1,5 @@
 #include "GF2k.hpp"
+#include <algorithm>
 #include <cstdint>
 #include <immintrin.h>
 #include <random>
@@ -56,7 +57,7 @@ elem pow(elem a, uint64_t e)
     elem r = 1;
     while (e)
     {
-        if(e & 1)
+        if (e & 1)
         {
             r = mul_f(r, a);
         }
@@ -65,5 +66,51 @@ elem pow(elem a, uint64_t e)
     }
 
     return r;
+}
+
+elem det(std::vector<std::vector<elem>> M, size_t n)
+{
+    elem det = one();
+    for (size_t i = 0; i < n; ++i)
+    {
+        size_t pivot_row;
+        bool pivot_found = false;
+
+        for (size_t j = i; j < n; ++j)
+        {
+            if (M[j][i] != 0)
+            {
+                pivot_row = j;
+                pivot_found = true;
+                break;
+            }
+        }
+
+        if (pivot_found == false)
+        {
+            return 0;
+        }
+        if (pivot_row != i)
+        {
+            std::swap(M[i], M[pivot_row]);
+        }
+
+        det = mul_f(det, M[i][i]);
+        elem inverse_pivot = inv(M[i][i]);
+
+        for (size_t j = i + 1; j < n; ++j)
+        {
+            if (M[j][i] == 0)
+            {
+                continue;
+            }
+            elem factor = mul_f(M[j][i], inverse_pivot);
+            for (size_t k = i; k < n; ++k)
+            {
+                M[j][k] = add(M[j][k], mul_f(factor, M[i][k]));
+            }
+        }
+    }
+    return det;
 }
 } // namespace gf2k
