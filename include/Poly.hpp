@@ -24,5 +24,9 @@ class Poly
     }
     
     gf2k::elem eval(gf2k::elem x) const;
-
+    
 };
+
+std::vector<std::vector<Poly>> eval_matrix(std::vector<std::vector<Poly>> &M, size_t n);
+
+Poly poly_det(std::vector<std::vector<Poly>> &M, size_t n, size_t d);

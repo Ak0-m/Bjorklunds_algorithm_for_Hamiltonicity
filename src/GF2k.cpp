@@ -68,7 +68,7 @@ elem pow(elem a, uint64_t e)
     return r;
 }
 
-elem det(std::vector<std::vector<elem>> M, size_t n)
+elem det(std::vector<std::vector<elem>> &M, size_t n)
 {
     elem det = one();
     for (size_t i = 0; i < n; ++i)
@@ -112,5 +112,17 @@ elem det(std::vector<std::vector<elem>> M, size_t n)
         }
     }
     return det;
+}
+
+std::vector<elem> generate_numbers(size_t n)
+{
+    std::vector<elem> nums(n);
+    
+    for(size_t i = 0; i < n; ++i)
+    {
+        nums[i] = static_cast<elem>(i);
+    }
+
+    return nums;
 }
 } // namespace gf2k

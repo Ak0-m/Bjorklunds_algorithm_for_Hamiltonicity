@@ -2,7 +2,7 @@
 
 void Poly::trim()
 {
-    if(coeffs_.size() == 0)
+    if (coeffs_.size() == 0)
     {
         return;
     }
@@ -16,7 +16,7 @@ void Poly::trim()
         {
             return;
         }
-        if(i == 0)
+        if (i == 0)
         {
             return;
         }
@@ -39,7 +39,7 @@ Poly Poly::operator+(const Poly &b) const
             c[i] = gf2k::add(c[i], b[i]);
         }
         Poly new_poly = Poly(c);
-        
+
         return new_poly;
     }
     else
@@ -97,15 +97,15 @@ gf2k::elem Poly::operator[](std::size_t i) const
 
 gf2k::elem Poly::eval(gf2k::elem x) const
 {
-    if(coeffs_.size() == 0)
+    if (coeffs_.size() == 0)
     {
         return 0;
     }
     gf2k::elem res = gf2k::zero();
 
-    for(size_t i = coeffs_.size()-1; true; --i)
+    for (size_t i = coeffs_.size() - 1; true; --i)
     {
-        if(i == 0)
+        if (i == 0)
         {
             res = gf2k::add(gf2k::mul_f(res, x), coeffs_[0]);
             return res;
@@ -113,4 +113,63 @@ gf2k::elem Poly::eval(gf2k::elem x) const
 
         res = gf2k::add(gf2k::mul_f(res, x), coeffs_[i]);
     }
+}
+
+std::vector<std::vector<gf2k::elem>> eval_matrix(std::vector<std::vector<Poly>> &M, size_t n, gf2k::elem x)
+{
+    std::vector<std::vector<gf2k::elem>> M_elem(n, std::vector<gf2k::elem>(n));
+
+    for (size_t i = 0; i < n; ++i)
+    {
+        for (size_t j = 0; j < n; ++j)
+        {
+            M_elem[i][j] = M[i][j].eval(x);
+        }
+    }
+
+    return M_elem;
+}
+
+Poly poly_det(std::vector<std::vector<Poly>> &M, size_t n, size_t d)
+{
+    std::vector<gf2k::elem> points = gf2k::generate_numbers(d + 1);
+
+    std::vector<gf2k::elem> dets(d + 1);
+    std::vector<std::vector<gf2k::elem>> M_elem;
+
+    for (size_t i = 0; i < d + 1; ++i)
+    {
+        M_elem = eval_matrix(M, n, points[i]);
+        dets[i] = gf2k::det(M_elem, n);
+    }
+
+    for (size_t i = 1; i < d + 1; ++i)
+    {
+        for (size_t j = d; j >= i; --j)
+        {
+            gf2k::elem num = gf2k::add(dets[j], dets[j - 1]);
+            gf2k::elem den = gf2k::add(points[j], points[j - i]);
+            dets[j] = gf2k::mul_f(num, gf2k::inv(den));
+        }
+    }
+
+    Poly det({dets[d]});
+
+    if (d > 0)
+    {
+        for (size_t i = d - 1; true; --i)
+        {
+            Poly factor({points[i], gf2k::one()});
+            Poly factor2({dets[i]});
+            det = det * factor;
+            det = det + factor2;
+
+            if (i == 0)
+            {
+                break;
+            }
+        }
+    }
+
+    return det;
 }

@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <random>
+#include <vector>
 
 namespace gf2k
 {
@@ -17,7 +18,9 @@ elem mul_f(elem a, elem b);
 elem inv(elem a);
 elem pow(elem a, uint64_t e);
 
-elem det(std::vector<std::vector<elem>> M, size_t n);
+elem det(std::vector<std::vector<elem>> &M, size_t n);
+
+std::vector<elem> generate_numbers(size_t n);
 
 inline elem random(std::mt19937_64 &rng)
 {
