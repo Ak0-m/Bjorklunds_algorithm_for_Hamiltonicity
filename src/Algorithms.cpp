@@ -1,6 +1,5 @@
 #include "Algorithms.hpp"
 #include <bits/stdc++.h>
-#include <cstdint>
 #include <vector>
 
 std::vector<gf2k::elem> fhat(const std::vector<std::vector<gf2k::elem>> &g, size_t v1_elem, std::vector<size_t> &V2)
@@ -110,4 +109,75 @@ std::vector<std::vector<std::vector<gf2k::elem>>> assign_dummy_label_weights(std
     }
 
     return w;
+}
+
+std::vector<std::vector<std::vector<gf2k::elem>>> compute_Mf(gf2k::elem r, size_t m,
+                                                             std::vector<std::vector<gf2k::elem>> &fh,
+                                                             std::vector<std::vector<std::vector<gf2k::elem>>> &dw,
+                                                             std::vector<size_t> &V1, std::vector<size_t> &V2)
+{
+    size_t L = V2.size() + m;
+    size_t L_num = 1 << L;
+    size_t V2_mask = (1 << V2.size()) - 1;
+
+    std::vector<std::vector<std::vector<gf2k::elem>>> Mf(
+        L_num, std::vector<std::vector<gf2k::elem>>(V1.size(), std::vector<gf2k::elem>(V1.size(), gf2k::zero())));
+
+    for (size_t Z = 1; Z < L_num; ++Z)
+    {
+        size_t V2_part = Z & V2_mask;
+        size_t dummy_part = Z >> V2.size();
+
+        if (V2_part != 0 && dummy_part == 0)
+        {
+            size_t k = __builtin_popcountll(V2_part);
+            gf2k::elem rk = gf2k::pow(r, k);
+
+            for (size_t v = 0; v < V1.size(); ++v)
+            {
+                for (size_t u = 0; u < V1.size(); ++u)
+                {
+                    Mf[Z][u][v] = gf2k::mul_f(fh[v][V2_part * (V1.size() + V2.size()) + V1[u]], rk);
+                }
+            }
+        }
+        else if (V2_part == 0 && __builtin_popcountll(dummy_part) == 1)
+        {
+            size_t k = __builtin_ctzll(dummy_part);
+
+            for (size_t v = 0; v < V1.size(); ++v)
+            {
+                for (size_t u = 0; u < V1.size(); ++u)
+                {
+                    Mf[Z][u][v] = gf2k::mul_f(dw[k][V1[u]][V1[v]], r);
+                }
+            }
+        }
+    }
+    return Mf;
+}
+
+void yates_transform(std::vector<std::vector<std::vector<gf2k::elem>>> &g, size_t L)
+{
+    size_t L_num = 1 << L;
+    size_t n1 = g[0].size();
+
+    for (size_t i = 0; i < L; ++i)
+    {
+        size_t bit = 1 << i;
+        for (size_t Y = 0; Y < L_num; ++Y)
+        {
+            if (Y & bit)
+            {
+                size_t Y_prev = Y ^ bit;
+                for (size_t u = 0; u < n1; ++u)
+                {
+                    for (size_t v = 0; v < n1; ++v)
+                    {
+                        g[Y][u][v] = gf2k::add(g[Y][u][v], g[Y_prev][u][v]);
+                    }
+                }
+            }
+        }
+    }
 }
