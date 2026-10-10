@@ -11,7 +11,8 @@ endif()
 
 add_library(gf2k STATIC
     src/GF2k.cpp
-    src/Poly.cpp
+  src/Poly.cpp
+  src/Algorithms.cpp
 )
 target_include_directories(gf2k PUBLIC include)   # <-- was src, should be include
 

@@ -1,0 +1,11 @@
+#pragma once
+
+#include "GF2k.hpp"
+
+std::vector<std::vector<gf2k::elem>> assign_label_weights(std::vector<std::vector<size_t>> &g, std::vector<size_t> &V2,
+                                                          std::mt19937_64 rng);
+std::vector<std::vector<std::vector<gf2k::elem>>> assign_dummy_label_weights(std::vector<std::vector<size_t>> &g,
+                                                                             std::vector<size_t> &V1, size_t mmax,
+                                                                             std::mt19937_64 rng);
+
+std::vector<gf2k::elem> fhat(const std::vector<std::vector<gf2k::elem>> &g, size_t v1_, std::vector<size_t> &V2);
