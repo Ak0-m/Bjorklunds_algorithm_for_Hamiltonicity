@@ -115,54 +115,28 @@ gf2k::elem Poly::eval(gf2k::elem x) const
     }
 }
 
-std::vector<std::vector<gf2k::elem>> eval_matrix(std::vector<std::vector<Poly>> &M, size_t n, gf2k::elem x)
+Poly interpolate(std::vector<gf2k::elem> points, std::vector<gf2k::elem> targets)
 {
-    std::vector<std::vector<gf2k::elem>> M_elem(n, std::vector<gf2k::elem>(n));
-
-    for (size_t i = 0; i < n; ++i)
+    for (size_t i = 1; i < points.size(); ++i)
     {
-        for (size_t j = 0; j < n; ++j)
+        for (size_t j = points.size() - 1; j >= i; --j)
         {
-            M_elem[i][j] = M[i][j].eval(x);
-        }
-    }
-
-    return M_elem;
-}
-
-Poly poly_det(std::vector<std::vector<Poly>> &M, size_t n, size_t d)
-{
-    std::vector<gf2k::elem> points = gf2k::generate_numbers(d + 1);
-
-    std::vector<gf2k::elem> dets(d + 1);
-    std::vector<std::vector<gf2k::elem>> M_elem;
-
-    for (size_t i = 0; i < d + 1; ++i)
-    {
-        M_elem = eval_matrix(M, n, points[i]);
-        dets[i] = gf2k::det(M_elem, n);
-    }
-
-    for (size_t i = 1; i < d + 1; ++i)
-    {
-        for (size_t j = d; j >= i; --j)
-        {
-            gf2k::elem num = gf2k::add(dets[j], dets[j - 1]);
+            gf2k::elem num = gf2k::add(targets[j], targets[j - 1]);
             gf2k::elem den = gf2k::add(points[j], points[j - i]);
-            dets[j] = gf2k::mul_f(num, gf2k::inv(den));
+            targets[j] = gf2k::mul_f(num, gf2k::inv(den));
         }
     }
 
-    Poly det({dets[d]});
+    Poly p({targets[points.size() - 1]});
 
-    if (d > 0)
+    if (points.size() - 1 > 0)
     {
-        for (size_t i = d - 1; true; --i)
+        for (size_t i = points.size() - 2; true; --i)
         {
             Poly factor({points[i], gf2k::one()});
-            Poly factor2({dets[i]});
-            det = det * factor;
-            det = det + factor2;
+            Poly factor2({targets[i]});
+            p = p * factor;
+            p = p + factor2;
 
             if (i == 0)
             {
@@ -171,5 +145,5 @@ Poly poly_det(std::vector<std::vector<Poly>> &M, size_t n, size_t d)
         }
     }
 
-    return det;
+    return p;
 }

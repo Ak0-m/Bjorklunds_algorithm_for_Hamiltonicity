@@ -1,4 +1,5 @@
 #include "Algorithms.hpp"
+#include "Poly.hpp"
 #include <bits/stdc++.h>
 #include <vector>
 
@@ -180,4 +181,49 @@ void yates_transform(std::vector<std::vector<std::vector<gf2k::elem>>> &g, size_
             }
         }
     }
+}
+
+gf2k::elem det_sum(std::vector<std::vector<std::vector<gf2k::elem>>> &g, size_t n1)
+{
+    gf2k::elem sum = gf2k::zero();
+
+    for (int i = 0; i < g.size(); ++i)
+    {
+        auto T = g[i];
+        sum = gf2k::add(sum, gf2k::det(T, n1));
+    }
+
+    return sum;
+}
+
+gf2k::elem run_lccs(gf2k::elem r, gf2k::elem m, std::vector<std::vector<gf2k::elem>> &fh,
+                    std::vector<std::vector<std::vector<gf2k::elem>>> &dw, std::vector<size_t> &V1,
+                    std::vector<size_t> &V2)
+{
+    auto g = compute_Mf(r, m, fh, dw, V1, V2);
+    yates_transform(g, V2.size() + m);
+
+    return det_sum(g, V1.size());
+}
+
+gf2k::elem extract_coef(gf2k::elem r, gf2k::elem m, std::vector<std::vector<gf2k::elem>> &fh,
+                    std::vector<std::vector<std::vector<gf2k::elem>>> &dw, std::vector<size_t> &V1,
+                    std::vector<size_t> &V2)
+{
+    size_t L = V2.size() + m;
+    size_t deg = L * (V1.size() + V2.size());
+
+    std::vector<gf2k::elem> points(deg + 1), targets(deg + 1);
+
+    for (size_t i = 0; i < deg + 1; ++i)
+    {
+        gf2k::elem i_p = (gf2k::elem)i;
+        gf2k::elem i_t = run_lccs(i_p, m, fh, dw, V1, V2);
+        points[i] = i_p;
+        targets[i] = i_t;
+    }
+
+    Poly p = interpolate(points, targets);
+
+    return p[L];
 }

@@ -27,6 +27,4 @@ class Poly
     
 };
 
-std::vector<std::vector<Poly>> eval_matrix(std::vector<std::vector<Poly>> &M, size_t n);
-
-Poly poly_det(std::vector<std::vector<Poly>> &M, size_t n, size_t d);
+Poly interpolate(std::vector<gf2k::elem> points, std::vector<gf2k::elem> targets);

@@ -117,8 +117,7 @@ elem det(std::vector<std::vector<elem>> &M, size_t n)
 std::vector<elem> generate_numbers(size_t n)
 {
     std::vector<elem> nums(n);
-    
-    for(size_t i = 0; i < n; ++i)
+    for (size_t i = 0; i < n; ++i)
     {
         nums[i] = static_cast<elem>(i);
     }

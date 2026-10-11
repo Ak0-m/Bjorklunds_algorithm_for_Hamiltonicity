@@ -17,3 +17,13 @@ std::vector<std::vector<std::vector<gf2k::elem>>> compute_Mf(gf2k::elem r, size_
                                                              std::vector<size_t> &V1, std::vector<size_t> &V2);
 
 void yates_transform(std::vector<std::vector<std::vector<gf2k::elem>>> &g, size_t L);
+
+gf2k::elem det_sum(std::vector<std::vector<std::vector<gf2k::elem>>> &g, size_t n);
+
+gf2k::elem run_lccs(gf2k::elem r, gf2k::elem m, std::vector<std::vector<gf2k::elem>> &fh,
+                    std::vector<std::vector<std::vector<gf2k::elem>>> &dw, std::vector<size_t> &V1,
+                    std::vector<size_t> &V2);
+
+gf2k::elem extract_coef(gf2k::elem r, gf2k::elem m, std::vector<std::vector<gf2k::elem>> &fh,
+                    std::vector<std::vector<std::vector<gf2k::elem>>> &dw, std::vector<size_t> &V1,
+                    std::vector<size_t> &V2);
