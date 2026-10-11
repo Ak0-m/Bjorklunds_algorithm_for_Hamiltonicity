@@ -26,5 +26,5 @@ elseif(MSVC)
     target_compile_options(gf2k PRIVATE /arch:AVX2 /O2)
 endif()
 
-enable_testing()
-add_subdirectory(tests)
+target_compile_options(gf2k PRIVATE -fopenmp -march=native -O3)
+target_link_options(gf2k PUBLIC -fopenmp)

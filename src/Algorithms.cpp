@@ -174,6 +174,7 @@ void yates_transform(std::vector<std::vector<std::vector<gf2k::elem>>> &g, size_
     for (size_t i = 0; i < L; ++i)
     {
         size_t bit = 1 << i;
+        #pragma omp parallel for schedule(static)
         for (size_t Y = 0; Y < L_num; ++Y)
         {
             if (Y & bit)
@@ -195,16 +196,17 @@ gf2k::elem det_sum(std::vector<std::vector<std::vector<gf2k::elem>>> &g, size_t 
 {
     gf2k::elem sum = gf2k::zero();
 
+    #pragma omp parallel for reduction(^:sum) schedule(dynamic, 64)
     for (int i = 0; i < g.size(); ++i)
     {
         auto T = g[i];
-        sum = gf2k::add(sum, gf2k::det(T, n1));
+        sum = sum ^ gf2k::det(T, n1);
     }
 
     return sum;
 }
 
-gf2k::elem run_lccs(gf2k::elem r, gf2k::elem m, std::vector<std::vector<gf2k::elem>> &fh,
+gf2k::elem run_lccs(gf2k::elem r, size_t m, std::vector<std::vector<gf2k::elem>> &fh,
                     std::vector<std::vector<std::vector<gf2k::elem>>> &dw, std::vector<size_t> &V1,
                     std::vector<size_t> &V2)
 {
@@ -214,12 +216,12 @@ gf2k::elem run_lccs(gf2k::elem r, gf2k::elem m, std::vector<std::vector<gf2k::el
     return det_sum(g, V1.size());
 }
 
-gf2k::elem extract_coef(gf2k::elem m, std::vector<std::vector<gf2k::elem>> &fh,
+gf2k::elem extract_coef(size_t m, std::vector<std::vector<gf2k::elem>> &fh,
                         std::vector<std::vector<std::vector<gf2k::elem>>> &dw, std::vector<size_t> &V1,
                         std::vector<size_t> &V2)
 {
     size_t L = V2.size() + m;
-    size_t deg = L * (V1.size() + V2.size());
+    size_t deg = L * V1.size();
 
     std::vector<gf2k::elem> points(deg + 1), targets(deg + 1);
 
@@ -273,7 +275,7 @@ bool run_once(std::vector<std::vector<size_t>> &g, size_t mmax, std::mt19937_64 
 
     std::vector<std::vector<gf2k::elem>> fh(V1.size(), std::vector<gf2k::elem>(V2.size() * g.size()));
 
-    for (int i = 0; i < V1.size(); ++i)
+    for (size_t i = 0; i < V1.size(); ++i)
     {
         fh[i] = fhat(w, V1[i], V2);
     }

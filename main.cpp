@@ -11,6 +11,9 @@ int main()
     std::ios::sync_with_stdio(false);
     std::cin.tie(nullptr);
 
+    size_t trials;
+    std::cin >> trials;
+
     std::size_t T;
     if (!(std::cin >> T))
         return 0;
@@ -30,7 +33,7 @@ int main()
         }
 
         std::mt19937_64 rng(67);
-        bool hc = decide(g, 30, rng);
+        bool hc = decide(g, trials, rng);
 
         std::cout << "{";
         std::cout << "\"id\":" << t << ",";
