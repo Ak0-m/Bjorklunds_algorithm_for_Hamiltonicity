@@ -9,12 +9,16 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release)
 endif()
 
+
 add_library(gf2k STATIC
     src/GF2k.cpp
   src/Poly.cpp
   src/Algorithms.cpp
 )
-target_include_directories(gf2k PUBLIC include)   # <-- was src, should be include
+target_include_directories(gf2k PUBLIC include) 
+
+add_executable(main main.cpp)
+target_link_libraries(main PRIVATE gf2k)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     target_compile_options(gf2k PRIVATE -march=native -O3)

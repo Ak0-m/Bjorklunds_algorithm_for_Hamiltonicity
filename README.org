@@ -1,0 +1,11 @@
+#+TITLE: Bjorklund's Algorithm for Hamiltonicity
+#+AUTHOR: Andrej Karafiloski
+#+OPTIONS: ^:nil
+
+* Introduction
+This is a c++ implementation of Andreas Bjorklund's algorithm for determining if a graph is hamiltonian. This algorithm lowered the exponential part of the time complexity from $\mathcal{O}*(2^{n})$ to $\mathcal{O}*(2^{n})$.
+
+* Warning
+This algorithm may have some logical problems, i still haven't fully tested it, it also is for most smaller graphs slower than Held-Karp because of large polynomial complexity.
+
+Link to the paper: https://arxiv.org/pdf/1008.0541

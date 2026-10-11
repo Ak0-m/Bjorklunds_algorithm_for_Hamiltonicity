@@ -24,6 +24,14 @@ gf2k::elem run_lccs(gf2k::elem r, gf2k::elem m, std::vector<std::vector<gf2k::el
                     std::vector<std::vector<std::vector<gf2k::elem>>> &dw, std::vector<size_t> &V1,
                     std::vector<size_t> &V2);
 
-gf2k::elem extract_coef(gf2k::elem r, gf2k::elem m, std::vector<std::vector<gf2k::elem>> &fh,
+gf2k::elem extract_coef(gf2k::elem m, std::vector<std::vector<gf2k::elem>> &fh,
                     std::vector<std::vector<std::vector<gf2k::elem>>> &dw, std::vector<size_t> &V1,
                     std::vector<size_t> &V2);
+
+void random_partition(size_t n, std::vector<size_t> &V1, std::vector<size_t> &V2, std::mt19937_64 &rng);
+
+bool run_once(std::vector<std::vector<size_t>> &g, size_t mmax, std::mt19937_64 &rng);
+
+bool decide(std::vector<std::vector<size_t>> &g, size_t trials, std::mt19937_64 &rng);
+
+

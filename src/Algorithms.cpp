@@ -138,6 +138,10 @@ std::vector<std::vector<std::vector<gf2k::elem>>> compute_Mf(gf2k::elem r, size_
             {
                 for (size_t u = 0; u < V1.size(); ++u)
                 {
+                    if (u == v)
+                    {
+                        continue;
+                    }
                     Mf[Z][u][v] = gf2k::mul_f(fh[v][V2_part * (V1.size() + V2.size()) + V1[u]], rk);
                 }
             }
@@ -150,6 +154,10 @@ std::vector<std::vector<std::vector<gf2k::elem>>> compute_Mf(gf2k::elem r, size_
             {
                 for (size_t u = 0; u < V1.size(); ++u)
                 {
+                    if (u == v)
+                    {
+                        continue;
+                    }
                     Mf[Z][u][v] = gf2k::mul_f(dw[k][V1[u]][V1[v]], r);
                 }
             }
@@ -206,9 +214,9 @@ gf2k::elem run_lccs(gf2k::elem r, gf2k::elem m, std::vector<std::vector<gf2k::el
     return det_sum(g, V1.size());
 }
 
-gf2k::elem extract_coef(gf2k::elem r, gf2k::elem m, std::vector<std::vector<gf2k::elem>> &fh,
-                    std::vector<std::vector<std::vector<gf2k::elem>>> &dw, std::vector<size_t> &V1,
-                    std::vector<size_t> &V2)
+gf2k::elem extract_coef(gf2k::elem m, std::vector<std::vector<gf2k::elem>> &fh,
+                        std::vector<std::vector<std::vector<gf2k::elem>>> &dw, std::vector<size_t> &V1,
+                        std::vector<size_t> &V2)
 {
     size_t L = V2.size() + m;
     size_t deg = L * (V1.size() + V2.size());
@@ -226,4 +234,70 @@ gf2k::elem extract_coef(gf2k::elem r, gf2k::elem m, std::vector<std::vector<gf2k
     Poly p = interpolate(points, targets);
 
     return p[L];
+}
+
+void random_partition(size_t n, std::vector<size_t> &V1, std::vector<size_t> &V2, std::mt19937_64 &rng)
+{
+    V1.clear();
+    V2.clear();
+
+    std::vector<size_t> elems(n - 1);
+
+    for (size_t i = 0; i < elems.size(); ++i)
+    {
+        elems[i] = i + 1;
+    }
+
+    std::shuffle(elems.begin(), elems.end(), rng);
+    V1.push_back(0);
+    for (size_t i = 0; i < elems.size(); ++i)
+    {
+        if (i % 2 == 0)
+        {
+            V2.push_back(elems[i]);
+        }
+        else
+        {
+            V1.push_back(elems[i]);
+        }
+    }
+}
+
+bool run_once(std::vector<std::vector<size_t>> &g, size_t mmax, std::mt19937_64 &rng)
+{
+    std::vector<size_t> V1, V2;
+    random_partition(g.size(), V1, V2, rng);
+
+    auto w = assign_label_weights(g, V2, rng);
+    auto dw = assign_dummy_label_weights(g, V1, mmax, rng);
+
+    std::vector<std::vector<gf2k::elem>> fh(V1.size(), std::vector<gf2k::elem>(V2.size() * g.size()));
+
+    for (int i = 0; i < V1.size(); ++i)
+    {
+        fh[i] = fhat(w, V1[i], V2);
+    }
+
+    for (std::size_t m = 0; m <= mmax; ++m)
+    {
+        gf2k::elem coeff = extract_coef(m, fh, dw, V1, V2);
+        if (coeff != gf2k::zero())
+            return true;
+    }
+    return false;
+}
+
+bool decide(std::vector<std::vector<size_t>> &g, size_t trials, std::mt19937_64 &rng)
+{
+    const std::size_t m_max = (std::size_t)(std::ceil(0.205 * static_cast<double>(g.size())));
+
+    for (std::size_t i = 0; i < trials; ++i)
+    {
+        if (run_once(g, m_max, rng))
+        {
+            return true;
+        }
+    }
+
+    return false;
 }
