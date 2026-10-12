@@ -61,7 +61,7 @@ elem pow(elem a, uint64_t e)
         {
             r = mul_f(r, a);
         }
-        a = mul(a, a);
+        a = mul_f(a, a);
         e >>= 1;
     }
 

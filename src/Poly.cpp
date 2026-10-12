@@ -63,7 +63,7 @@ Poly Poly::operator*(const Poly &b) const
     {
         for (size_t j = 0; j < b.coeffs_.size(); ++j)
         {
-            c[i + j] = gf2k::add(c[i + j], gf2k::mul(coeffs_[i], b.coeffs_[j]));
+            c[i + j] = gf2k::add(c[i + j], gf2k::mul_f(coeffs_[i], b.coeffs_[j]));
         }
     }
 
@@ -78,7 +78,7 @@ Poly Poly::operator*(const gf2k::elem b) const
 
     for (size_t i = 0; i < coeffs_.size(); ++i)
     {
-        c[i] = gf2k::mul(c[i], b);
+        c[i] = gf2k::mul_f(c[i], b);
     }
 
     Poly new_poly = Poly(c);

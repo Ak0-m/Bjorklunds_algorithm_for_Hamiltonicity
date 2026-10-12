@@ -1,6 +1,6 @@
 #include "Algorithms.hpp"
 #include "Poly.hpp"
-#include <bits/stdc++.h>
+#include <algorithm>
 #include <vector>
 
 std::vector<gf2k::elem> fhat(const std::vector<std::vector<gf2k::elem>> &g, size_t v1_elem, std::vector<size_t> &V2)
@@ -112,7 +112,7 @@ std::vector<std::vector<std::vector<gf2k::elem>>> assign_dummy_label_weights(std
     return w;
 }
 
-std::vector<std::vector<std::vector<gf2k::elem>>> compute_Mf(gf2k::elem r, size_t m,
+std::vector<std::vector<std::vector<gf2k::elem>>> compute_Mf(size_t m,
                                                              std::vector<std::vector<gf2k::elem>> &fh,
                                                              std::vector<std::vector<std::vector<gf2k::elem>>> &dw,
                                                              std::vector<size_t> &V1, std::vector<size_t> &V2)
@@ -131,8 +131,6 @@ std::vector<std::vector<std::vector<gf2k::elem>>> compute_Mf(gf2k::elem r, size_
 
         if (V2_part != 0 && dummy_part == 0)
         {
-            size_t k = __builtin_popcountll(V2_part);
-            gf2k::elem rk = gf2k::pow(r, k);
 
             for (size_t v = 0; v < V1.size(); ++v)
             {
@@ -142,7 +140,7 @@ std::vector<std::vector<std::vector<gf2k::elem>>> compute_Mf(gf2k::elem r, size_
                     {
                         continue;
                     }
-                    Mf[Z][u][v] = gf2k::mul_f(fh[v][V2_part * (V1.size() + V2.size()) + V1[u]], rk);
+                    Mf[Z][u][v] = fh[v][V2_part * (V1.size() + V2.size()) + V1[u]];
                 }
             }
         }
@@ -158,7 +156,7 @@ std::vector<std::vector<std::vector<gf2k::elem>>> compute_Mf(gf2k::elem r, size_
                     {
                         continue;
                     }
-                    Mf[Z][u][v] = gf2k::mul_f(dw[k][V1[u]][V1[v]], r);
+                    Mf[Z][u][v] = dw[k][V1[u]][V1[v]];
                 }
             }
         }
@@ -174,7 +172,7 @@ void yates_transform(std::vector<std::vector<std::vector<gf2k::elem>>> &g, size_
     for (size_t i = 0; i < L; ++i)
     {
         size_t bit = 1 << i;
-        #pragma omp parallel for schedule(static)
+#pragma omp parallel for schedule(static)
         for (size_t Y = 0; Y < L_num; ++Y)
         {
             if (Y & bit)
@@ -196,7 +194,7 @@ gf2k::elem det_sum(std::vector<std::vector<std::vector<gf2k::elem>>> &g, size_t 
 {
     gf2k::elem sum = gf2k::zero();
 
-    #pragma omp parallel for reduction(^:sum) schedule(dynamic, 64)
+#pragma omp parallel for reduction(^ : sum) schedule(dynamic, 64)
     for (int i = 0; i < g.size(); ++i)
     {
         auto T = g[i];
@@ -208,12 +206,30 @@ gf2k::elem det_sum(std::vector<std::vector<std::vector<gf2k::elem>>> &g, size_t 
 
 gf2k::elem run_lccs(gf2k::elem r, size_t m, std::vector<std::vector<gf2k::elem>> &fh,
                     std::vector<std::vector<std::vector<gf2k::elem>>> &dw, std::vector<size_t> &V1,
-                    std::vector<size_t> &V2)
+                    std::vector<size_t> &V2, std::vector<std::vector<std::vector<gf2k::elem>>> &Mf)
 {
-    auto g = compute_Mf(r, m, fh, dw, V1, V2);
-    yates_transform(g, V2.size() + m);
 
-    return det_sum(g, V1.size());
+    std::vector<gf2k::elem> exp(1 << (V2.size() + m));
+    exp[0] = gf2k::one();
+    for (size_t i = 1; i < exp.size(); ++i)
+    {
+        exp[i] = gf2k::mul_f(exp[i & (i - 1)], r);
+    }
+
+    for (size_t i = 0; i < exp.size(); ++i)
+    {
+        for (size_t j = 0; j < V1.size(); ++j)
+        {
+            for (size_t k = 0; k < V1.size(); ++k)
+            {
+                Mf[i][j][k] = gf2k::mul_f(Mf[i][j][k], exp[i]);
+            }
+        }
+    }
+    
+    yates_transform(Mf, V2.size() + m);
+
+    return det_sum(Mf, V1.size());
 }
 
 gf2k::elem extract_coef(size_t m, std::vector<std::vector<gf2k::elem>> &fh,
@@ -225,10 +241,13 @@ gf2k::elem extract_coef(size_t m, std::vector<std::vector<gf2k::elem>> &fh,
 
     std::vector<gf2k::elem> points(deg + 1), targets(deg + 1);
 
+    auto Mf = compute_Mf(m, fh, dw, V1, V2);
+    
     for (size_t i = 0; i < deg + 1; ++i)
     {
         gf2k::elem i_p = (gf2k::elem)i;
-        gf2k::elem i_t = run_lccs(i_p, m, fh, dw, V1, V2);
+        auto Mf_work = Mf;
+        gf2k::elem i_t = run_lccs(i_p, m, fh, dw, V1, V2, Mf_work);
         points[i] = i_p;
         targets[i] = i_t;
     }
