@@ -105,10 +105,11 @@ elem det(std::vector<std::vector<elem>> &M, size_t n)
                 continue;
             }
             elem factor = mul_f(M[j][i], inverse_pivot);
-            for (size_t k = i; k < n; ++k)
+            for (size_t k = i + 1; k < n; ++k)
             {
                 M[j][k] = add(M[j][k], mul_f(factor, M[i][k]));
             }
+            M[j][i] = gf2k::zero();
         }
     }
     return det;

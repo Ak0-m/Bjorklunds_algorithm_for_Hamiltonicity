@@ -8,7 +8,4 @@ This is a c++ implementation of Andreas Bjorklund's algorithm for determining if
 * Input
 the main.cpp first takes a non-negative number =trials= this is the number of times the =decide= function will run (the larger this is the smaller chance of a false-negative, tought it will need more time to calculate), then it takes =T= the number of graphs it will check, and for every graph you enter, first number of nodes, then number of edges and then for every edge two numbers, the nodes it is incidental with (nodes are numbered fron 0 to n-1, n-number of edges).
 
-* Warning
-This algorithm may have some logical problems, i still haven't fully tested it, it also is for most smaller graphs slower than Held-Karp because of large polynomial complexity.
-
 Link to the paper: https://arxiv.org/pdf/1008.0541

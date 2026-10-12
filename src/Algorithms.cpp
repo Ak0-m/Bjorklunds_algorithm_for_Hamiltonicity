@@ -197,8 +197,8 @@ gf2k::elem det_sum(std::vector<std::vector<std::vector<gf2k::elem>>> &g, size_t 
 #pragma omp parallel for reduction(^ : sum) schedule(dynamic, 64)
     for (int i = 0; i < g.size(); ++i)
     {
-        auto T = g[i];
-        sum = sum ^ gf2k::det(T, n1);
+        //auto T = g[i];
+        sum = sum ^ gf2k::det(g[i], n1);
     }
 
     return sum;
